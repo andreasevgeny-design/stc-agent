@@ -245,6 +245,7 @@ const AI_SETTINGS_KEY = "stc_ai_settings";
 const SUGGESTED_MODELS = {
   gemini: "gemini-2.0-flash (бесплатно, 60 запр/мин). Альтернативы: gemini-1.5-flash, gemini-2.5-flash",
   openrouter: "Бесплатные: meta-llama/llama-3.3-70b-instruct:free, deepseek/deepseek-r1:free, google/gemini-2.0-flash-exp:free",
+  deepseek: "deepseek-chat (очень дешёвый, ~20₽ за миллион токенов). Ключ: platform.deepseek.com → API Keys",
   custom: "Укажите любую модель вашего провайдера",
 };
 
@@ -326,8 +327,11 @@ async function callLLM(roleKey, userText) {
     return data?.choices?.[0]?.message?.content || null;
   }
 
-  if (s.provider === "custom") {
-    const base = (s.base || "https://api.openai.com/v1").replace(/\/$/, "");
+  if (s.provider === "custom" || s.provider === "deepseek") {
+    const base = s.provider === "deepseek"
+      ? "https://api.deepseek.com/v1"
+      : (s.base || "https://api.openai.com/v1").replace(/\/$/, "");
+    const model = s.model || (s.provider === "deepseek" ? "deepseek-chat" : "gpt-4o-mini");
     const res = await fetch(base + "/chat/completions", {
       method: "POST",
       headers: {
@@ -335,7 +339,7 @@ async function callLLM(roleKey, userText) {
         "Authorization": "Bearer " + s.key,
       },
       body: JSON.stringify({
-        model: s.model || "gpt-4o-mini",
+        model,
         messages,
         temperature: 0.5,
         max_tokens: 1024,
