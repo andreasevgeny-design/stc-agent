@@ -17,6 +17,7 @@
         <p>Сибирская Торговая Компания · с 2006 года</p>
       </div>
       <a class="site-link" href="https://stkompany.ru" target="_blank" rel="noopener">stkompany.ru</a>
+      <button class="settings-btn" id="settingsBtn" title="Настройки ИИ">⚙️</button>
     </header>
 
     <!-- Выбор роли -->
@@ -55,6 +56,41 @@
       <textarea id="userInput" rows="1" placeholder="Напишите вопрос, например: «Как оформить договор по 44-ФЗ?»"></textarea>
       <button class="send-btn accent-btn" id="sendBtn" title="Отправить">➤</button>
     </footer>
+  </div>
+
+  <!-- Настройки ИИ -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚙️ Настройки ИИ</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <p class="hint">Подключите бесплатную нейросеть, чтобы агент отвечал на любые вопросы (а не только по готовым шаблонам). Поле ключа сохраняется только в этом браузере.</p>
+
+      <label class="field-label" for="aiProvider">Провайдер</label>
+      <select id="aiProvider">
+        <option value="" selected>Выключено (готовые ответы)</option>
+        <option value="gemini">Google Gemini (бесплатный) — ключ на aistudio.google.com/apikey</option>
+        <option value="openrouter">OpenRouter (есть бесплатные модели) — ключ на openrouter.ai/keys</option>
+        <option value="custom">Другая OpenAI-совместимая</option>
+      </select>
+
+      <label class="field-label" for="aiModel">Модель</label>
+      <input type="text" id="aiModel" placeholder="например: gemini-2.0-flash">
+      <p class="hint suggest" id="modelSuggest"></p>
+
+      <label class="field-label" for="aiKey">API-ключ</label>
+      <input type="password" id="aiKey" placeholder="Вставьте ключ">
+
+      <label class="field-label" for="aiBase">Base URL (только для «Другая API»)</label>
+      <input type="text" id="aiBase" placeholder="https://api.deepseek.com/v1">
+
+      <div class="modal-actions">
+        <button class="send-btn accent-btn" id="testBtn" style="width:auto;border-radius:22px;padding:0 20px;">Проверить</button>
+        <button class="send-btn" id="saveBtn" style="width:auto;border-radius:22px;padding:0 20px;">Сохранить</button>
+      </div>
+      <p class="test-result" id="testResult"></p>
+    </div>
   </div>
 
   <script src="app.js"></script>

@@ -240,7 +240,117 @@ function marketerAnswer(m, cx) {
   return `**Маркетинг ${cx.short}**\n\nГотов проработать:\n${bullet(["Маркетинговая стратегия и позиционирование", "Контент-план для VK / Telegram / сайта", "Акции и спецпредложения для B2B", "Анализ конкурентов и рынка", "Продвижение тендерного бренда (44-ФЗ)"])}\n\nУточните задачу — предложу конкретные действия и каналы.`;
 }
 
-/* ---------- UI ---------- */
+/* ---------- РЕАЛЬНЫЙ ИИ (опционально) ---------- */
+const AI_SETTINGS_KEY = "stc_ai_settings";
+const SUGGESTED_MODELS = {
+  gemini: "gemini-2.0-flash (бесплатно, 60 запр/мин). Альтернативы: gemini-1.5-flash, gemini-2.5-flash",
+  openrouter: "Бесплатные: meta-llama/llama-3.3-70b-instruct:free, deepseek/deepseek-r1:free, google/gemini-2.0-flash-exp:free",
+  custom: "Укажите любую модель вашего провайдера",
+};
+
+function loadAiSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function buildSystemPrompt(roleKey) {
+  const role = ROLES[roleKey];
+  const cx = KNOWLEDGE.company;
+  const facts = `КОМПАНИЯ (только эти факты, не выдумывай):
+- ${cx.name} (${cx.short}), с ${cx.since} года, стаж ${cx.years} лет
+- Адрес: ${cx.address}, email: ${cx.email}, тел.: ${cx.phones.main}
+- Выигранных тендеров: ${cx.tenders} (44-ФЗ и 223-ФЗ)
+- Склады ${cx.warehouse}, автопарк с температурой от −18°C до +6°C
+- Профиль роли: ${role.icon} ${role.name}
+- Миссия: ${cx.mission}`;
+  return `${role.prompt}\n\nБаза знаний по компании СТК:\n${facts}\n\nКаталог категорий:\n${KNOWLEDGE.categories.map(([n, d]) => "• " + n + " — " + d).join("\n")}\n\nЛогистика:\n${KNOWLEDGE.logistics.stages.join("\n")}\n\nПравила: отвечай на русском, кратко и по делу. Если не знаешь точного факта — честно скажи «точной информации нет в моей базе», не придумывай цены. Преимущества компании: ${KNOWLEDGE.advantages.join("; ")}.`;
+}
+
+async function callLLM(roleKey, userText) {
+  const s = loadAiSettings();
+  if (!s.provider || !s.key) return null;
+
+  const system = buildSystemPrompt(roleKey);
+  const messages = [
+    { role: "system", content: system },
+    { role: "user", content: userText },
+  ];
+
+  if (s.provider === "gemini") {
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(s.model || "gemini-2.0-flash") + ":generateContent?key=" + encodeURIComponent(s.key);
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [
+          { role: "user", parts: [{ text: userText }] },
+        ],
+        generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error("Gemini " + res.status + ": " + err.slice(0, 200));
+    }
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
+    return text || null;
+  }
+
+  if (s.provider === "openrouter") {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + s.key,
+        "HTTP-Referer": location.origin,
+        "X-Title": "CTK AI Agent",
+      },
+      body: JSON.stringify({
+        model: s.model || "meta-llama/llama-3.3-70b-instruct:free",
+        messages,
+        temperature: 0.5,
+        max_tokens: 1024,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error("OpenRouter " + res.status + ": " + err.slice(0, 200));
+    }
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content || null;
+  }
+
+  if (s.provider === "custom") {
+    const base = (s.base || "https://api.openai.com/v1").replace(/\/$/, "");
+    const res = await fetch(base + "/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + s.key,
+      },
+      body: JSON.stringify({
+        model: s.model || "gpt-4o-mini",
+        messages,
+        temperature: 0.5,
+        max_tokens: 1024,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error("API " + res.status + ": " + err.slice(0, 200));
+    }
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content || null;
+  }
+
+  return null;
+}
 const chat = document.getElementById("chat");
 const input = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -297,7 +407,7 @@ function removeTyping() {
   if (el) el.remove();
 }
 
-function respond(userText) {
+async function respond(userText) {
   const roleKey = currentRole === "auto" ? detectRole(userText) : currentRole;
   const role = ROLES[roleKey];
   updateBadge(roleKey);
@@ -305,13 +415,100 @@ function respond(userText) {
   addMessage(userText, "user");
   showTyping();
 
-  setTimeout(() => {
-    removeTyping();
-    const text = answer(userText, roleKey);
-    const tagged = `<span class="role-tag">${role.icon} ${role.name} · ${currentRole === "auto" ? "определено автоматически" : "выбранный профиль"}</span>` + hlight(text);
-    addMessage(tagged, "bot");
-  }, 650);
+  let text = null;
+  let usedLLM = false;
+  try {
+    text = await callLLM(roleKey, userText);
+    usedLLM = !!text;
+  } catch (e) {
+    text = null;
+  }
+  removeTyping();
+
+  const source = usedLLM ? "ИИ" : (currentRole === "auto" ? "определено автоматически" : "выбранный профиль");
+  if (!text) text = answer(userText, roleKey);
+  const tagged = `<span class="role-tag">${role.icon} ${role.name} · ${source}</span>` + hlight(text);
+  addMessage(tagged, "bot");
 }
+
+/* ---------- НАСТРОЙКИ ИИ ---------- */
+const settingsModal = document.getElementById("settingsModal");
+const settingsBtn = document.getElementById("settingsBtn");
+const modalClose = document.getElementById("modalClose");
+const providerEl = document.getElementById("aiProvider");
+const modelEl = document.getElementById("aiModel");
+const keyEl = document.getElementById("aiKey");
+const baseEl = document.getElementById("aiBase");
+const modelSuggest = document.getElementById("modelSuggest");
+const testResult = document.getElementById("testResult");
+const testBtn = document.getElementById("testBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+function openSettings() {
+  const s = loadAiSettings();
+  providerEl.value = s.provider || "";
+  modelEl.value = s.model || "";
+  keyEl.value = s.key || "";
+  baseEl.value = s.base || "";
+  updateSuggest();
+  settingsModal.classList.add("open");
+}
+
+function closeSettings() {
+  settingsModal.classList.remove("open");
+  testResult.textContent = "";
+  testResult.className = "test-result";
+}
+
+function updateSuggest() {
+  modelSuggest.textContent = SUGGESTED_MODELS[providerEl.value] || "";
+  baseEl.parentElement.style.display = providerEl.value === "custom" ? "" : "none";
+}
+
+settingsBtn.addEventListener("click", openSettings);
+modalClose.addEventListener("click", closeSettings);
+settingsModal.addEventListener("click", (e) => {
+  if (e.target === settingsModal) closeSettings();
+});
+providerEl.addEventListener("change", updateSuggest);
+
+saveBtn.addEventListener("click", () => {
+  const settings = {
+    provider: providerEl.value,
+    model: modelEl.value.trim(),
+    key: keyEl.value.trim(),
+    base: baseEl.value.trim(),
+  };
+  localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(settings));
+  testResult.textContent = settings.provider ? "Настройки сохранены ✓" : "ИИ отключён — агент отвечает по готовым ответам";
+  testResult.className = "test-result ok";
+});
+
+testBtn.addEventListener("click", async () => {
+  const settings = {
+    provider: providerEl.value,
+    model: modelEl.value.trim(),
+    key: keyEl.value.trim(),
+    base: baseEl.value.trim(),
+  };
+  if (!settings.provider || !settings.key) {
+    testResult.textContent = "Выберите провайдера и введите ключ";
+    testResult.className = "test-result err";
+    return;
+  }
+  testResult.textContent = "Проверяю связь с нейросетью…";
+  testResult.className = "test-result";
+  try {
+    const reply = await callLLM("sales", "Скажи одним словом: все системы работают?");
+    testResult.textContent = "Связь есть ✓ Модель ответила: " + reply.slice(0, 80);
+    testResult.className = "test-result ok";
+  } catch (e) {
+    testResult.textContent = "Ошибка: " + e.message;
+    testResult.className = "test-result err";
+  }
+});
+
+updateBadge("auto");
 
 function send() {
   const value = input.value.trim();
@@ -332,5 +529,3 @@ input.addEventListener("input", () => {
   input.style.height = "auto";
   input.style.height = Math.min(input.scrollHeight, 120) + "px";
 });
-
-updateBadge("auto");
