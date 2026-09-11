@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="stcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5276"/>
+      <stop offset="50%" style="stop-color:#2980b9"/>
+      <stop offset="100%" style="stop-color:#1a5276"/>
+    </linearGradient>
+    <linearGradient id="aiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c"/>
+      <stop offset="100%" style="stop-color:#e67e22"/>
+    </linearGradient>
+    <linearGradient id="btnGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f39c12"/>
+      <stop offset="100%" style="stop-color:#e74c3c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Фон -->
+  <rect width="512" height="512" rx="96" fill="#0d1b2a"/>
+
+  <!-- Круг - щит цели -->
+  <circle cx="256" cy="220" r="160" fill="none" stroke="#ffffff" stroke-width="14" opacity="0.08"/>
+  <circle cx="256" cy="220" r="132" fill="none" stroke="#ffffff" stroke-width="10" opacity="0.12"/>
+
+  <!-- Верхняя часть: руки/поддержка -->
+  <path d="M256 300 L150 240 L256 160 L362 240 Z" fill="#ffffff" opacity="0.06"/>
+
+  <!-- Логотип СТК -->
+  <text x="256" y="250" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="96" fill="url(#stcGrad)">СТК</text>
+
+  <!-- AI Иконка - нейронные связи -->
+  <g transform="translate(256, 200)">
+    <!-- Точки нейронов -->
+    <circle cx="-60" cy="-40" r="14" fill="#ffffff"/>
+    <circle cx="60" cy="-40" r="14" fill="#ffffff"/>
+    <circle cx="0" cy="20" r="14" fill="#ffffff"/>
+    <circle cx="-45" cy="55" r="14" fill="#ffffff"/>
+    <circle cx="45" cy="55" r="14" fill="#ffffff"/>
+    <!-- Связи -->
+    <line x1="-55" y1="-35" x2="-5" y2="15" stroke="#e74c3c" stroke-width="3" opacity="0.7"/>
+    <line x1="55" y1="-35" x2="5" y2="15" stroke="#e74c3c" stroke-width="3" opacity="0.7"/>
+    <line x1="-45" y1="50" x2="-5" y2="25" stroke="#e74c3c" stroke-width="3" opacity="0.7"/>
+    <line x1="45" y1="50" x2="5" y2="25" stroke="#e74c3c" stroke-width="3" opacity="0.7"/>
+  </g>
+
+  <!-- Скобка AI -->
+  <text x="256" y="340" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="56" fill="url(#aiGrad)">AI</text>
+
+  <!-- Подпись -->
+  <rect x="96" y="380" width="320" height="2" rx="1" fill="#ffffff" opacity="0.15"/>
+
+  <!-- Текст внизу -->
+  <text x="256" y="280" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="34" fill="#ffffff" opacity="0.9">Сибирская Торговая</text>
+  <text x="256" y="312" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="34" fill="#ffffff" opacity="0.9">Компания</text>
+
+  <!-- Полоса снизу -->
+  <rect x="96" y="400" width="320" height="5" rx="2.5" fill="url(#btnGrad)"/>
+
+  <!-- Маленькие точки декоративные -->
+  <circle cx="120" cy="180" r="3" fill="#e74c3c" opacity="0.7"/>
+  <circle cx="392" cy="180" r="3" fill="#2980b9" opacity="0.7"/>
+  <circle cx="120" cy="300" r="3" fill="#2980b9" opacity="0.7"/>
+  <circle cx="392" cy="300" r="3" fill="#e74c3c" opacity="0.7"/>
+
+  <!-- Круг для сердца -->
+  <circle cx="256" cy="226" r="72" fill="none" stroke="url(#stcGrad)" stroke-width="6" opacity="0.5"/>
+</svg>

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "name": "STC Agent",
+  "version": "1.0.0",
+  "description": "AI-агент для сотрудников ООО Сибирская Торговая Компания",
+  "provider": {
+    "name": "openai",
+    "model": "gpt-4",
+    "apiKey": "$OPENAI_API_KEY"
+  },
+  "agents": {
+    "stc-main": {
+      "name": "СТК Ассистент",
+      "description": "Главный агент для маршрутизации задач сотрудникам СТК",
+      "file": "agents/main_agent.py",
+      "systemPrompt": "agents/prompts/main.md"
+    },
+    "lawyer": {
+      "name": "Юрист СТК",
+      "description": "Помощник юрида по договорам и правовым вопросам",
+      "file": "agents/lawyer.py",
+      "systemPrompt": "agents/prompts/lawyer.md"
+    },
+    "accountant": {
+      "name": "Бухгалтер СТК",
+      "description": "Помощник бухгалтера по учёту и отчётности",
+      "file": "agents/accountant.py",
+      "systemPrompt": "agents/prompts/accountant.md"
+    },
+    "sales_manager": {
+      "name": "Менеджер продаж СТК",
+      "description": "Помощник менеджера по работе с клиентами",
+      "file": "agents/sales_manager.py",
+      "systemPrompt": "agents/prompts/sales_manager.md"
+    },
+    "director": {
+      "name": "Руководитель СТК",
+      "description": "Аналитический помощник для руководства",
+      "file": "agents/director.py",
+      "systemPrompt": "agents/prompts/director.md"
+    },
+    "marketer": {
+      "name": "Маркетолог СТК",
+      "description": "Помощник по маркетингу и продвижению",
+      "file": "agents/marketer.py",
+      "systemPrompt": "agents/prompts/marketer.md"
+    }
+  },
+  "knowledgeBase": {
+    "files": [
+      "knowledge_base/company_info.md",
+      "knowledge_base/products.md",
+      "knowledge_base/logistics.md",
+      "knowledge_base/tenders.md",
+      "knowledge_base/contacts.md"
+    ]
+  },
+  "settings": {
+    "language": "ru",
+    "maxTokens": 4096,
+    "temperature": 0.7
+  }
+}
