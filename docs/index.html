@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>СТК AI-Агент — помощник сотрудников</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Шапка -->
+    <header class="app-header">
+      <img class="header-logo" src="logo.png" alt="СТК AI Агент" onerror="this.style.display='none'">
+      <div class="header-text">
+        <h1>СТК <span class="accent">AI</span>-Агент</h1>
+        <p>Сибирская Торговая Компания · с 2006 года</p>
+      </div>
+      <a class="site-link" href="https://stkompany.ru" target="_blank" rel="noopener">stkompany.ru</a>
+    </header>
+
+    <!-- Выбор роли -->
+    <section class="role-selector">
+      <span class="role-label">Мой профиль:</span>
+      <div class="role-chips" id="roleChips">
+        <button class="chip active" data-role="auto">🔀 Авто</button>
+        <button class="chip" data-role="lawyer">⚖️ Юрист</button>
+        <button class="chip" data-role="accountant">💰 Бухгалтер</button>
+        <button class="chip" data-role="sales">📈 Продажи</button>
+        <button class="chip" data-role="director">🎯 Руководитель</button>
+        <button class="chip" data-role="marketer">🎨 Маркетолог</button>
+      </div>
+    </section>
+
+    <!-- Чат -->
+    <main class="chat" id="chat">
+      <div class="message bot welcome">
+        <div class="bubble">
+          <b>Здравствуйте! 👋</b> Я — AI-ассистент «Сибирской Торговой Компании».
+          <br><br>
+          Могу помочь по профилям:<br>
+          ⚖️ Юрист — договоры, 44-ФЗ/223-ФЗ, тендеры<br>
+          💰 Бухгалтер — НДС, счета, отчётность<br>
+          📈 Продажи — КП, ассортимент, доставка<br>
+          🎯 Руководитель — аналитика, стратегия<br>
+          🎨 Маркетолог — продвижение, контент<br><br>
+          Выберите профиль слева или напишите вопрос — я сам определю, кому он адресован.
+        </div>
+      </div>
+    </main>
+
+    <!-- Ввод -->
+    <footer class="input-area">
+      <button class="send-btn" id="roleBadge" title="Определено автоматически">🔀</button>
+      <textarea id="userInput" rows="1" placeholder="Напишите вопрос, например: «Как оформить договор по 44-ФЗ?»"></textarea>
+      <button class="send-btn accent-btn" id="sendBtn" title="Отправить">➤</button>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
